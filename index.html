@@ -2,140 +2,135 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Pink Sparkle Grid</title>
+<title>Pink Sparkle Night</title>
 <style>
-    body {
-        background: #111;
+    /* Base layout */
+    * { box-sizing: border-box; }
+    html, body {
         margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: Arial;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(180deg, #ffe3f2 0%, #ffb2d4 40%, #f78cb8 100%);
     }
 
-    #grid {
-        display: grid;
-        grid-template-columns: repeat(50, 12px);
-        grid-template-rows: repeat(30, 12px);
-        gap: 2px;
-    }
-
-    .cell {
-        width: 12px;
-        height: 12px;
-        background: #1a1a1a;
-        border-radius: 2px;
-    }
-
-    /* ✨ Sparkle animation */
-    .sparkle {
-        animation: pinkTwinkle 400ms ease-in-out;
-    }
-
-    /* 🎨 Pink shades */
-    .pink1 { background-color: #FFD7EF; }
-    .pink2 { background-color: #FF9AD5; }
-    .pink3 { background-color: #FF5FBF; }
-    .pink4 { background-color: #D81B60; }
-
-    @keyframes pinkTwinkle {
-        0% {
-            opacity: 0;
-            box-shadow: 0 0 2px rgba(255, 175, 220, 0.4);
-        }
-        50% {
-            opacity: 1;
-            box-shadow: 0 0 6px rgba(255, 120, 210, 0.9);
-        }
-        100% {
-            opacity: 0;
-            box-shadow: 0 0 2px rgba(255, 175, 220, 0.4);
-        }
-    }
-
-    /* Button */
-    button {
+    /* Subtle pixel-like texture behind the sparkles */
+    body::before {
+        content: "";
         position: absolute;
-        top: 20px;
-        padding: 10px 20px;
-        font-size: 16px;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1px, transparent 0),
+            radial-gradient(circle at 4px 6px, rgba(255, 255, 255, 0.07) 1px, transparent 0);
+        background-size: 12px 12px, 16px 16px;
+        opacity: 0.8;
+        mix-blend-mode: screen;
+        pointer-events: none;
+    }
+
+    /* Soft glow layer for extra depth */
+    body::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.25), transparent 45%),
+                    radial-gradient(circle at 20% 60%, rgba(255, 175, 213, 0.25), transparent 45%),
+                    radial-gradient(circle at 80% 70%, rgba(255, 200, 230, 0.2), transparent 45%);
+        pointer-events: none;
+        mix-blend-mode: screen;
+    }
+
+    /* Sparkle field */
+    .sky {
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }
+
+    .star {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #fff7ff;
+        box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+        opacity: 0;
+        animation: twinkle 2.6s ease-in-out infinite, drift 7s linear infinite;
+    }
+
+    .star::before,
+    .star::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+        transform: rotate(45deg);
+        opacity: 0.8;
+    }
+
+    .star::after {
+        transform: rotate(-45deg);
+    }
+
+    .tiny {
+        width: 2px;
+        height: 2px;
+        box-shadow: 0 0 3px rgba(255, 255, 255, 0.7);
+        animation-duration: 2s, 6s;
+    }
+
+    .slow { animation-duration: 3.2s, 9s; }
+    .fast { animation-duration: 1.8s, 5s; }
+
+    @keyframes twinkle {
+        0%, 80%, 100% { opacity: 0; transform: scale(0.3); }
+        20% { opacity: 0.65; transform: scale(1); }
+        40% { opacity: 1; transform: scale(1.15); }
+        60% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    @keyframes drift {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(14px); }
     }
 </style>
 </head>
 <body>
-
-<button onclick="toggleSparkles()">Start Pink Sparkle</button>
-<div id="grid"></div>
-
+<div class="sky" id="sky"></div>
 <script>
-    const ROWS = 30;
-    const COLS = 50;
-    let running = false;
-    let lastSparkles = [];
+    const STAR_COUNT = 90;
+    const sky = document.getElementById('sky');
 
-    // Build Grid
-    const grid = document.getElementById("grid");
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-            const cell = document.createElement("div");
-            cell.classList.add("cell");
-            cell.id = `cell-${r}-${c}`;
-            grid.appendChild(cell);
-        }
+    function randomBetween(min, max) {
+        return Math.random() * (max - min) + min;
     }
 
-    function getCell(r, c) {
-        return document.getElementById(`cell-${r}-${c}`);
+    function createStar() {
+        const star = document.createElement('div');
+        star.classList.add('star');
+
+        // Random sizing and speed variation
+        const sizeClass = Math.random() > 0.65 ? 'tiny' : '';
+        const speedClass = Math.random() > 0.7 ? 'slow' : Math.random() > 0.5 ? 'fast' : '';
+        if (sizeClass) star.classList.add(sizeClass);
+        if (speedClass) star.classList.add(speedClass);
+
+        // Random position
+        star.style.left = `${randomBetween(0, 100)}%`;
+        star.style.top = `${randomBetween(0, 100)}%`;
+
+        // Offset the animation timing so stars don't blink together
+        const delay = randomBetween(0, 3);
+        star.style.animationDelay = `${delay}s, ${delay / 2}s`;
+
+        sky.appendChild(star);
     }
 
-    function delay(ms) {
-        return new Promise(res => setTimeout(res, ms));
-    }
-
-    function toggleSparkles() {
-        running = !running;
-        if (running) {
-            document.querySelector("button").innerText = "Stop Pink Sparkle";
-            pinkSparkle();
-        } else {
-            document.querySelector("button").innerText = "Start Pink Sparkle";
-        }
-    }
-
-    // ✨ Pink Sparkle Animation
-    async function pinkSparkle() {
-        const density = 0.015;
-        const frameDelay = 60;
-        const shades = ["pink1", "pink2", "pink3", "pink4"];
-
-        while (running) {
-            // clear last sparkles
-            for (const p of lastSparkles) {
-                const cell = getCell(p.r, p.c);
-                if (cell) cell.className = "cell";
-            }
-
-            lastSparkles = [];
-
-            // number of sparkles this frame
-            const totalCells = ROWS * COLS;
-            const count = Math.max(1, Math.floor(totalCells * density));
-
-            for (let i = 0; i < count; i++) {
-                const r = Math.floor(Math.random() * ROWS);
-                const c = Math.floor(Math.random() * COLS);
-                const cell = getCell(r, c);
-                const shade = shades[Math.floor(Math.random() * shades.length)];
-
-                cell.className = `cell sparkle ${shade}`;
-                lastSparkles.push({ r, c });
-            }
-
-            await delay(frameDelay);
-        }
+    for (let i = 0; i < STAR_COUNT; i++) {
+        createStar();
     }
 </script>
-
 </body>
 </html>
