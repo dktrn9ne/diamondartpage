@@ -63,35 +63,53 @@
 
     .star {
         position: absolute;
-        width: 3px;
-        height: 3px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+        width: 4px;
+        height: 4px;
+        border-radius: 0;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.85);
+        image-rendering: pixelated;
         opacity: 0;
-        animation: twinkle 3s ease-in-out infinite, drift 9s linear infinite;
+        animation: twinkle 2.6s steps(2, end) infinite, drift 8s linear infinite;
     }
 
     .tiny {
         width: 2px;
         height: 2px;
-        box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-        animation-duration: 2.6s, 7s;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.75);
+        animation-duration: 2.2s, 6.5s;
     }
 
     .slow { animation-duration: 3.4s, 11s; }
-    .fast { animation-duration: 2.2s, 7s; }
+    .fast { animation-duration: 2s, 6s; }
+
+    .pixel {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 0;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+        animation: fall linear infinite;
+        image-rendering: pixelated;
+    }
 
     @keyframes twinkle {
-        0%, 80%, 100% { opacity: 0; transform: scale(0.4); }
-        25% { opacity: 0.5; transform: scale(0.8); }
-        50% { opacity: 0.9; transform: scale(1); }
-        65% { opacity: 0.6; transform: scale(0.9); }
+        0%, 80%, 100% { opacity: 0; transform: scale(0.6); }
+        25% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+        65% { opacity: 0.7; transform: scale(0.9); }
     }
 
     @keyframes drift {
         0% { transform: translateY(0); }
-        100% { transform: translateY(10px); }
+        100% { transform: translateY(12px); }
+    }
+
+    @keyframes fall {
+        0% { transform: translateY(-10vh); opacity: 0; }
+        10% { opacity: 1; }
+        100% { transform: translateY(110vh); opacity: 0.1; }
     }
 </style>
 </head>
@@ -101,7 +119,8 @@
     <img class="logo" src="./logo.png" alt="Diamond Art logo" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/dktrn9ne/diamondartpage/main/logo.png';">
 </div>
 <script>
-    const STAR_COUNT = 40;
+    const STAR_COUNT = 50;
+    const PIXEL_COUNT = 18;
     const sky = document.getElementById('sky');
 
     function randomBetween(min, max) {
@@ -129,9 +148,23 @@
         sky.appendChild(star);
     }
 
-    for (let i = 0; i < STAR_COUNT; i++) {
-        createStar();
+    function createPixel() {
+        const pixel = document.createElement('div');
+        pixel.classList.add('pixel');
+
+        pixel.style.left = `${randomBetween(0, 100)}%`;
+        pixel.style.top = `${randomBetween(-20, 0)}%`;
+
+        const duration = randomBetween(6, 14);
+        const delay = randomBetween(0, 6);
+        pixel.style.animationDuration = `${duration}s`;
+        pixel.style.animationDelay = `${delay}s`;
+
+        sky.appendChild(pixel);
     }
+
+    for (let i = 0; i < STAR_COUNT; i++) createStar();
+    for (let i = 0; i < PIXEL_COUNT; i++) createPixel();
 </script>
 </body>
 </html>
